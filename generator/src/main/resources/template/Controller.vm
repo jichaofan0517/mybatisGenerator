@@ -1,0 +1,270 @@
+package ${package_name}.controller;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.lambo.common.annotation.EnableExportTable;
+import com.lambo.common.annotation.LogAround;
+import com.lambo.common.base.BaseController;
+import com.lambo.common.base.BaseResult;
+import com.lambo.common.base.BaseResultConstant;
+import com.lambo.common.utils.lang.StringUtils;
+import ${package_name}.model.${model};
+import ${package_name}.model.${model}Example;
+import ${package_name}.service.api.${model}Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ${model}controller
+ * @author ${author}
+ * @date ${ctime}.
+ */
+@SuppressWarnings("all")
+@Controller
+@RequestMapping("/manage/${modelV}")
+public class ${model}Controller extends BaseController {
+
+    private static Logger logger = LoggerFactory.getLogger(${model}Controller.class);
+
+    @Autowired
+    private ${model}Service ${modelV}Service;
+
+    @ApiOperation(value = "${model}列表")
+    @RequestMapping(value = "/list",method = RequestMethod.GET)
+    @ResponseBody
+    @LogAround("${model}分页数据")
+    public Object list(
+        @RequestParam(required = false, defaultValue = "0", value = "offset") int offset,
+        @RequestParam(required = false, defaultValue = "10", value = "limit") int limit,
+        @RequestParam(required = false, value = "sort") String sort,
+        @RequestParam(required = false, value = "order") String order,
+        @RequestParam(required = false, defaultValue = "", value = "search") String search,
+#set($columnLength = $columns.size())
+#set($count = 0)
+#foreach($column in $columns)
+    #set($count = $count + 1)
+    #set($condition = true)
+    #if($condition)
+        #set($required = false)
+        #set($dataType = 'String')
+        #if($column.DATA_TYPE == 'int')
+            #set($dataType = 'int')
+        #end
+        #set($endPoint = ',')
+        #if($count == $columnLength)
+            #set($endPoint = '')
+        #end
+    @RequestParam(required = ${required}, defaultValue = "${column.COLUMN_DEFAULT}", value = "${column.COLUMN_NAME_HUMP}") ${dataType} ${column.COLUMN_NAME_HUMP} ${endPoint}
+    #end
+#end) {
+
+${model}Example ${modelV}Example = new ${model}Example();
+if (!StringUtils.isBlank(sort) && !StringUtils.isBlank(order)) {
+${modelV}Example.setOrderByClause(sort + " " + order);
+}
+${model}Example.Criteria criteria = ${modelV}Example.createCriteria();
+
+if (StringUtils.isNotBlank(search)) {
+#set($pkType = 'String')
+#foreach($column in $columns)
+    #if($column.COLUMN_NAME_HUMP == $pk && $column.DATA_TYPE == 'int')
+        #set($pkType = 'int')
+    #end
+#end
+#if($pkType == 'int')
+criteria.and${search}EqualTo(Integer.parseInt(search));
+#else
+criteria.and${search}EqualTo(search);
+#end
+}
+
+#foreach($column in $columns)
+    #if($column.DATA_TYPE == 'VARCHAR2'|| $column.DATA_TYPE == 'CHAR')
+    if (StringUtils.isNotBlank(${column.COLUMN_NAME_HUMP})) {
+    criteria.and${column.COLUMN_NAME_HUMP_ALL}EqualTo(${column.COLUMN_NAME_HUMP});
+    }
+##    #else #if($column.DATA_TYPE == 'timestamp')
+##    //        if (StringUtils.isNotBlank(${column.COLUMN_NAME_HUMP})) {
+##    //            criteria.and${column.COLUMN_NAME_HUMP_ALL}EqualTo(${column.COLUMN_NAME_HUMP});
+##    //        }
+    #else
+    //if (StringUtils.isNotBlank(${column.COLUMN_NAME_HUMP})){
+    //           criteria.and${column.COLUMN_NAME_HUMP_ALL}EqualTo(Integer.parseInt(${column.COLUMN_NAME_HUMP}));
+    //        }
+##    #end
+    #end
+#end
+
+        PageHelper.offsetPage(offset, limit);
+        List<${model}> rows = ${modelV}Service.selectByExample(${modelV}Example);
+        PageInfo page = new PageInfo(rows);
+        Map<String, Object> result = new HashMap<>();
+        result.put(RESULT_ROWS, page.getList());
+        result.put(RESULT_TOTLAL, page.getTotal());
+        return new BaseResult(BaseResultConstant.SUCCESS,result);
+    }
+
+@ApiOperation(value = "根据${model}主键查询数据")
+    @RequestMapping(value = "/get/{${pk}}", method = RequestMethod.GET)
+    @ResponseBody
+    #if($pkType == 'int')
+    public Object get(@PathVariable("${pk}") int ${pk}) {
+        return ${modelV}Service.selectByPrimaryKey(${pk});
+    }
+    #else
+    public Object get(@PathVariable("${pk}") String ${pk}) {
+        ${model}Example ${modelV}Example = new ${model}Example();
+        ${modelV}Example.createCriteria().and${search}EqualTo(${pk});
+        return ${modelV}Service.selectFirstByExample(${modelV}Example);
+    }
+    #end
+
+
+    @ApiOperation(value = "新增${model}数据")
+    @ResponseBody
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    public Object create(
+        #set($columnLength = $columns.size())
+        #set($count = 0)
+        #foreach($column in $columns)
+            #set($count = $count + 1)
+            #set($condition = true)
+            #if($is_auto_inc == 'true')
+                #set($condition = $column.COLUMN_NAME && $column.COLUMN_NAME_HUMP && $column.COLUMN_NAME_HUMP != $pk)
+            #else
+                #set($condition = $column.COLUMN_NAME && $column.COLUMN_NAME_HUMP)
+            #end
+            #if($condition)
+                #set($required = false)
+                #if($column.IS_NULLABLE == 'NO')
+                    #set($required = true)
+                #end
+                #set($dataType = 'String')
+                #if($column.DATA_TYPE == 'int')
+                    #set($dataType = 'int')
+                #end
+                #set($endPoint = ',')
+                #if($count == $columnLength)
+                    #set($endPoint = '')
+                #end
+                @RequestParam(required = ${required}, defaultValue = "${column.COLUMN_DEFAULT}", value = "${column.COLUMN_NAME_HUMP}") ${dataType} ${column.COLUMN_NAME_HUMP} ${endPoint}
+            #end
+        #end) {
+
+        ${model} ${modelV} = new ${model}();
+        #foreach($column in $columns)
+            #set($condition = true)
+            #if($is_auto_inc == 'true')
+                #set($condition = $column.COLUMN_NAME && $column.COLUMN_NAME_HUMP && $column.COLUMN_NAME_HUMP != $pk)
+            #else
+                #set($condition = $column.COLUMN_NAME && $column.COLUMN_NAME_HUMP)
+            #end
+            #if($column.DATA_TYPE == 'int')
+                ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(${column.COLUMN_NAME_HUMP});
+            #elseif($column.DATA_TYPE == 'timestamp')
+
+            #elseif($column.DATA_TYPE == 'decimal')
+                ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(new BigDecimal(${column.COLUMN_NAME_HUMP}));
+            #else
+                #if($column.DATA_TYPE == 'VARCHAR2'|| $column.DATA_TYPE == 'CHAR')
+                    ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(${column.COLUMN_NAME_HUMP});
+                #else
+                //   ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(${column.COLUMN_NAME_HUMP});
+                #end
+            #end
+        #end
+        int count = ${modelV}Service.insertSelective(${modelV});
+        if (count <= 0) {
+            return new BaseResult(BaseResultConstant.FAILED, 0);
+        }
+        return new BaseResult(BaseResultConstant.SUCCESS, 1);
+    }
+
+    @ApiOperation(value = "更新${model}数据")
+    @ResponseBody
+    @RequestMapping(value = "/update/{${pk}}", method = RequestMethod.POST)
+    public Object update(
+        #set($columnLength = $columns.size)
+        #set($count = 0)
+        #foreach($column in $columns)
+            #set($count = $count + 1)
+            #set($required = false)
+            #if($column.IS_NULLABLE == 'NO')
+                #set($required = true)
+            #end
+            #set($dataType = 'String')
+            #if($column.DATA_TYPE=='timestamp')
+                #set($condition = false)
+            #end
+            #if($column.DATA_TYPE == 'int')
+                #set($dataType = 'int')
+            #end
+            #set($endPoint = ',')
+            #if($count == $columnLength)
+                #set($endPoint = '')
+            #end
+            #if($column.COLUMN_NAME_HUMP != ${pk})
+                @RequestParam(required = ${required}, defaultValue = "${column.COLUMN_DEFAULT}", value = "${column.COLUMN_NAME_HUMP}") ${dataType} ${column.COLUMN_NAME_HUMP} ${endPoint}
+            #else
+                @PathVariable("${pk}") ${dataType} ${pk} ${endPoint}
+            #end
+        #end) {
+
+        ${model} ${modelV} = new ${model}();
+        ${modelV}.set${search}(${pk});
+        #foreach($column in $columns)
+            #if($column.COLUMN_NAME && $column.COLUMN_NAME_HUMP_ALL && $column.COLUMN_NAME_HUMP != ${pk})
+                #if($column.DATA_TYPE == 'int')
+                    ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(${column.COLUMN_NAME_HUMP});
+                #elseif($column.DATA_TYPE == 'timestamp')
+
+                #elseif($column.DATA_TYPE == 'decimal')
+                    ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(new BigDecimal(${column.COLUMN_NAME_HUMP}));
+                #else
+                    #if($column.DATA_TYPE == 'VARCHAR2'|| $column.DATA_TYPE == 'CHAR')
+                        ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(${column.COLUMN_NAME_HUMP});
+                    #else
+                    //   ${modelV}.set${column.COLUMN_NAME_HUMP_ALL}(${column.COLUMN_NAME_HUMP});
+                    #end
+                #end
+            #end
+        #end
+        int count = ${modelV}Service.updateByPrimaryKeySelective(${modelV});
+        return new BaseResult(BaseResultConstant.SUCCESS, count);
+    }
+
+@ApiOperation(value = "删除${model}数据")
+@RequestMapping(value = "/delete/{${pk}s}",method = RequestMethod.GET)
+@ResponseBody
+@LogAround("删除${model}数据")
+public Object delete(@PathVariable("${pk}s") String ${pk}s) {
+#if($pkType == 'int')
+int count = ${modelV}Service.deleteByPrimaryKeys(${pk}s);
+return new BaseResult(BaseResultConstant.SUCCESS,count);
+#else
+int count = 0;
+if(StringUtils.isNotBlank(${pk}s)) {
+String[] idArray = null;
+if(${pk}s.indexOf(",")>0){
+idArray = ${pk}s.split(",");
+}else{
+idArray = new String[]{${pk}s};
+}
+for(int i = 0;i<idArray.length;i++){
+    ${model}Example ${modelV}Example = new ${model}Example();
+    ${modelV}Example.createCriteria().and${search}EqualTo(idArray[i]);
+count += ${modelV}Service.deleteByExample(${modelV}Example);
+}
+}
+return new BaseResult(BaseResultConstant.SUCCESS,count);
+#end
+}
+}

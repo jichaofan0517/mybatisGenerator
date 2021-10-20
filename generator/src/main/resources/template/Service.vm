@@ -1,0 +1,14 @@
+package ${package_name}.service.api;
+import ${package_name}.model.${model};
+import ${package_name}.model.${model}Example;
+
+import com.mybatis.code.commons.service.api.BaseService;
+/**
+* ${model}Service接口
+* @author ${author}
+* @date ${ctime}.
+*/
+@SuppressWarnings("all")
+public interface ${model}Service extends BaseService<${model}, ${model}Example> {
+
+}
