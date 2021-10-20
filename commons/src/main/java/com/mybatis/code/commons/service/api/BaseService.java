@@ -5,5 +5,6 @@ package com.mybatis.code.commons.service.api;
  * @Description
  * @create 2021-10-20 10:21
  */
-public interface BaseService<T, S> {
+public interface BaseService<T, V> {
+
 }
