@@ -17,6 +17,7 @@ public class StringUtils {
     public static String lineToHump(String str) {
         Pattern linePattern = Pattern.compile("_(\\w)");
         str = str.toLowerCase();
+        str = toUpperCaseFirstOne(str);
         Matcher matcher = linePattern.matcher(str);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {

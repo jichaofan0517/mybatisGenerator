@@ -32,6 +32,7 @@
             <artifactId>velocity</artifactId>
             <version>1.7</version>
         </dependency>
+
         <dependency>
             <groupId>org.mybatis.generator</groupId>
             <artifactId>mybatis-generator-core</artifactId>

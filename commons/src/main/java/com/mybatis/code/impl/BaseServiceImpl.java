@@ -1,6 +1,6 @@
-package com.mybatis.code.commons.service.impl;
+package com.mybatis.code.impl;
 
-import com.mybatis.code.commons.service.api.BaseService;
+import com.mybatis.code.api.BaseService;
 
 /**
  * @author jichf

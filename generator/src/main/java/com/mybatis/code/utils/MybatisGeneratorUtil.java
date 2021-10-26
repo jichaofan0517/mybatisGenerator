@@ -31,12 +31,6 @@ public class MybatisGeneratorUtil {
 
     private static String serviceImpl_vm = "/template/ServiceImpl.vm";
 
-//
-//    private static String result_vm = "/template/Result.vm";
-//
-//    private static String resultConstant_vm = "/template/ResultConstant.vm";
-//
-
 
     public static void generator(String jdbc_driver, String jdbc_url, String jdbc_username, String jdbc_password, String database, String table_name, String table_key, boolean is_auto_inc, String package_name, String author) throws Exception {
         generator(jdbc_driver, jdbc_url, jdbc_username, jdbc_password, database, table_name, table_key, is_auto_inc, package_name, author, DbType.MySQL);

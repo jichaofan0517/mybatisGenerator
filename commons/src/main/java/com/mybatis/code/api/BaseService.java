@@ -1,4 +1,4 @@
-package com.mybatis.code.commons.service.api;
+package com.mybatis.code.api;
 
 /**
  * @author jichf
