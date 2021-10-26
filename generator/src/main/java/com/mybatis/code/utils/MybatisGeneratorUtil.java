@@ -210,7 +210,10 @@ public class MybatisGeneratorUtil {
         try {
             String content = FileUtils.readFileToString(file);
             content = content.replace("public class", "@SuppressWarnings(\"all\")\npublic class");
-            content = content.replace("public interface", "@SuppressWarnings(\"all\")\npublic interface");
+            //SpringMvc
+//            content = content.replace("public interface", "@SuppressWarnings(\"all\")\npublic interface");
+            //添加一个模板没有的包，springboot需要
+            content = content.replace("public interface", "import org.apache.ibatis.annotations.Mapper;\n\n\n@Mapper\npublic interface");
             FileUtils.writeStringToFile(file, content);
         } catch (IOException iOException) {
         }
